@@ -23,3 +23,14 @@ test "budget report measures consumed error budget" {
   assert_eq(report.consumed_bp, 5000)
   assert_true(report.healthy())
 }
+
+///|
+test "burn rate compares observed and allowed error" {
+  let target = SloTarget::new("search", 9900, 30)
+  let window = RequestWindow::new("5m", 5, 1000, 980)
+  let report = calculate_burn_rate(target, window)
+  assert_eq(report.allowed_error_bp, 100)
+  assert_eq(report.observed_error_bp, 200)
+  assert_eq(report.burn_rate_x100, 200)
+  assert_eq(report.rate_label(), "2.00x")
+}
