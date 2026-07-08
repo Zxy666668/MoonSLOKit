@@ -1,0 +1,7 @@
+import {
+  "Zxy666668/moonslokit" @slo,
+}
+
+options(
+  "is-main": true,
+)

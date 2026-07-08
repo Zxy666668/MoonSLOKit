@@ -79,3 +79,14 @@ test "json exports budget and alert decisions" {
   assert_true(budget.to_json().contains("\"consumed_bp\":5000"))
   assert_true(alert.to_json().contains("\"level\":\"page\""))
 }
+
+///|
+test "alert level names are stable" {
+  let alert = AlertDecision::{
+    level: Ticket,
+    rule_name: "slow",
+    burn_rate_x100: 120,
+    reason: "threshold_exceeded",
+  }
+  assert_eq(alert.level_name(), "ticket")
+}
