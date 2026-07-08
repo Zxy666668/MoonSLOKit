@@ -1,10 +1,10 @@
-name = "moonslokit/moonslokit"
+name = "Zxy666668/moonslokit"
 
 version = "0.1.0"
 
 readme = "README.mbt.md"
 
-repository = "https://github.com/OWNER/MoonSLOKit"
+repository = "https://github.com/Zxy666668/MoonSLOKit"
 
 license = "Apache-2.0"
 

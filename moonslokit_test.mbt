@@ -34,3 +34,18 @@ test "burn rate compares observed and allowed error" {
   assert_eq(report.burn_rate_x100, 200)
   assert_eq(report.rate_label(), "2.00x")
 }
+
+///|
+test "burn rule turns high burn rate into alert decision" {
+  let target = SloTarget::new("api", 9900, 30)
+  let report = calculate_burn_rate(
+    target,
+    RequestWindow::new("5m", 5, 1000, 980),
+  )
+  let decision = evaluate_burn_rule(
+    report,
+    BurnRule::new("fast-burn", Page, 150),
+  )
+  assert_true(decision.is_alert())
+  assert_eq(decision.reason, "threshold_exceeded")
+}
