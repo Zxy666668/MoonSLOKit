@@ -64,3 +64,18 @@ test "multi window report keeps highest alert level" {
   assert_eq(report.decisions.length(), 2)
   assert_true(report.highest_level() == Page)
 }
+
+///|
+test "json exports budget and alert decisions" {
+  let target = SloTarget::new("api", 9900, 30)
+  let budget = evaluate_budget(
+    target,
+    RequestWindow::new("30m", 30, 10000, 9950),
+  )
+  let alert = evaluate_burn_rule(
+    calculate_burn_rate(target, RequestWindow::new("5m", 5, 1000, 980)),
+    BurnRule::new("fast", Page, 150),
+  )
+  assert_true(budget.to_json().contains("\"consumed_bp\":5000"))
+  assert_true(alert.to_json().contains("\"level\":\"page\""))
+}
