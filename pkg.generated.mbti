@@ -1,0 +1,91 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "Zxy666668/moonslokit"
+
+import {
+  "moonbitlang/core/debug",
+}
+
+// Values
+pub fn calculate_burn_rate(SloTarget, RequestWindow) -> BurnReport
+
+pub fn evaluate_budget(SloTarget, RequestWindow) -> BudgetReport
+
+pub fn evaluate_burn_rule(BurnReport, BurnRule) -> AlertDecision
+
+pub fn evaluate_multi_window(SloTarget, Array[RequestWindow], Array[BurnRule]) -> MultiWindowReport
+
+// Errors
+
+// Types and methods
+pub(all) struct AlertDecision {
+  level : AlertLevel
+  rule_name : String
+  burn_rate_x100 : Int
+  reason : String
+} derive(Eq, @debug.Debug)
+pub fn AlertDecision::is_alert(Self) -> Bool
+pub fn AlertDecision::level_name(Self) -> String
+pub fn AlertDecision::to_json(Self) -> String
+
+pub(all) enum AlertLevel {
+  Ok
+  Page
+  Ticket
+} derive(Eq, @debug.Debug)
+
+pub(all) struct BudgetReport {
+  target : SloTarget
+  window : RequestWindow
+  allowed_bad : Int
+  actual_bad : Int
+  consumed_bp : Int
+  remaining_bad : Int
+} derive(Eq, @debug.Debug)
+pub fn BudgetReport::healthy(Self) -> Bool
+pub fn BudgetReport::to_json(Self) -> String
+
+pub(all) struct BurnReport {
+  window : RequestWindow
+  allowed_error_bp : Int
+  observed_error_bp : Int
+  burn_rate_x100 : Int
+} derive(Eq, @debug.Debug)
+pub fn BurnReport::rate_label(Self) -> String
+
+pub(all) struct BurnRule {
+  name : String
+  level : AlertLevel
+  threshold_x100 : Int
+} derive(Eq, @debug.Debug)
+pub fn BurnRule::new(String, AlertLevel, Int) -> Self
+
+pub(all) struct MultiWindowReport {
+  target : SloTarget
+  reports : Array[BurnReport]
+  decisions : Array[AlertDecision]
+} derive(Eq, @debug.Debug)
+pub fn MultiWindowReport::highest_level(Self) -> AlertLevel
+
+pub(all) struct RequestWindow {
+  name : String
+  minutes : Int
+  total : Int
+  good : Int
+} derive(Eq, @debug.Debug)
+pub fn RequestWindow::availability_bp(Self) -> Int
+pub fn RequestWindow::bad(Self) -> Int
+pub fn RequestWindow::error_bp(Self) -> Int
+pub fn RequestWindow::new(String, Int, Int, Int) -> Self
+
+pub(all) struct SloTarget {
+  name : String
+  target_bp : Int
+  period_minutes : Int
+} derive(Eq, @debug.Debug)
+pub fn SloTarget::allowed_error_bp(Self) -> Int
+pub fn SloTarget::new(String, Int, Int) -> Self
+
+// Type aliases
+
+// Traits
+
