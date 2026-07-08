@@ -49,3 +49,18 @@ test "burn rule turns high burn rate into alert decision" {
   assert_true(decision.is_alert())
   assert_eq(decision.reason, "threshold_exceeded")
 }
+
+///|
+test "multi window report keeps highest alert level" {
+  let target = SloTarget::new("api", 9900, 30)
+  let report = evaluate_multi_window(
+    target,
+    [
+      RequestWindow::new("5m", 5, 1000, 980),
+      RequestWindow::new("1h", 60, 10000, 9985),
+    ],
+    [BurnRule::new("fast", Page, 150), BurnRule::new("slow", Ticket, 100)],
+  )
+  assert_eq(report.decisions.length(), 2)
+  assert_true(report.highest_level() == Page)
+}
