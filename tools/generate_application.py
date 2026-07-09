@@ -12,7 +12,7 @@ from reportlab.platypus import Paragraph, SimpleDocTemplate, Spacer, Table, Tabl
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / "output" / "pdf"
 OUT.mkdir(parents=True, exist_ok=True)
-PDF_PATH = OUT / "MoonSLOKit_项目申报书_增强版.pdf"
+PDF_PATH = OUT / "MoonSLOKit_项目申报书.pdf"
 
 FONT = "Helvetica"
 for candidate in [Path("C:/Windows/Fonts/msyh.ttc"), Path("C:/Windows/Fonts/simhei.ttf"), Path("C:/Windows/Fonts/simsun.ttc")]:
