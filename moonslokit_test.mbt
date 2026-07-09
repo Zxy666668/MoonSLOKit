@@ -129,3 +129,27 @@ test "standard burn templates expose four windows" {
   assert_eq(standard_window_names()[0], "5m")
   assert_eq(standard_window_minutes()[3], 1440)
 }
+
+///|
+test "budget forecast estimates exhaustion time" {
+  let target = SloTarget::new("api", 9900, 60)
+  let forecast = forecast_budget(
+    target,
+    RequestWindow::new("30m", 30, 10000, 9950),
+    30,
+  )
+  assert_eq(forecast.report.remaining_bad, 50)
+  assert_eq(forecast.bad_per_hour_x100, 10000)
+  assert_eq(forecast.minutes_to_exhaustion, 30)
+  assert_eq(forecast.state, "critical")
+}
+
+///|
+test "budget forecast marks exhausted budget" {
+  let forecast = forecast_budget(
+    SloTarget::new("api", 9900, 60),
+    RequestWindow::new("30m", 30, 10000, 9800),
+    30,
+  )
+  assert_true(forecast.exhausted())
+}
