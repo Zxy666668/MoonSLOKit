@@ -1,6 +1,11 @@
 ///|
 pub fn AlertDecision::level_name(self : AlertDecision) -> String {
-  match self.level {
+  self.level.name()
+}
+
+///|
+pub fn AlertLevel::name(self : AlertLevel) -> String {
+  match self {
     Ok => "ok"
     Page => "page"
     Ticket => "ticket"
@@ -15,6 +20,26 @@ pub fn BudgetReport::to_json(self : BudgetReport) -> String {
 ///|
 pub fn AlertDecision::to_json(self : AlertDecision) -> String {
   "{\"level\":\"\{self.level_name()}\",\"rule\":\"\{escape_json(self.rule_name)}\",\"burn_rate_x100\":\{self.burn_rate_x100},\"reason\":\"\{escape_json(self.reason)}\"}"
+}
+
+///|
+pub fn BudgetForecast::to_json(self : BudgetForecast) -> String {
+  "{\"target\":\"\{escape_json(self.report.target.name)}\",\"window\":\"\{escape_json(self.report.window.name)}\",\"bad_per_hour_x100\":\{self.bad_per_hour_x100},\"minutes_to_exhaustion\":\{self.minutes_to_exhaustion},\"state\":\"\{escape_json(self.state)}\"}"
+}
+
+///|
+pub fn GateDecision::to_json(self : GateDecision) -> String {
+  "{\"gate\":\"\{escape_json(self.gate_name)}\",\"allowed\":\{self.allowed},\"reason\":\"\{escape_json(self.reason)}\",\"consumed_bp\":\{self.consumed_bp},\"level\":\"\{self.highest_level.name()}\"}"
+}
+
+///|
+pub fn ServiceEvaluation::to_json(self : ServiceEvaluation) -> String {
+  "{\"service\":\"\{escape_json(self.service)}\",\"target\":\"\{escape_json(self.target_name)}\",\"healthy\":\{self.healthy()},\"gate\":\{self.gate.to_json()}}"
+}
+
+///|
+pub fn SloAnnotation::to_json(self : SloAnnotation) -> String {
+  "{\"minute\":\{self.minute},\"kind\":\"\{escape_json(self.kind)}\",\"message\":\"\{escape_json(self.message)}\"}"
 }
 
 ///|

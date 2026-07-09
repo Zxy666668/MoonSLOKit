@@ -218,3 +218,27 @@ test "annotated windows select events inside window range" {
   assert_true(annotated.has_kind("incident"))
   assert_false(annotated.has_kind("deploy"))
 }
+
+///|
+test "extended json exports include forecast gate service and annotation" {
+  let target = SloTarget::new("api", 9900, 60)
+  let forecast = forecast_budget(
+    target,
+    RequestWindow::new("30m", 30, 10000, 9950),
+    30,
+  )
+  let objective = ServiceObjective::new(
+    "api",
+    target,
+    [BurnRule::new("fast", Page, 500)],
+  )
+  let service = evaluate_service_objective(
+    objective,
+    RequestWindow::new("30m", 30, 10000, 9990),
+    [RequestWindow::new("5m", 5, 1000, 999)],
+    ReleaseGate::new("prod", 8000, true),
+  )
+  assert_true(forecast.to_json().contains("\"state\":\"critical\""))
+  assert_true(service.to_json().contains("\"service\":\"api\""))
+  assert_true(SloAnnotation::new(10, "deploy", "v2").to_json().contains("\"kind\":\"deploy\""))
+}
