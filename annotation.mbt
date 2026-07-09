@@ -37,10 +37,7 @@ pub fn annotate_window(
 }
 
 ///|
-pub fn AnnotatedWindow::has_kind(
-  self : AnnotatedWindow,
-  kind : String,
-) -> Bool {
+pub fn AnnotatedWindow::has_kind(self : AnnotatedWindow, kind : String) -> Bool {
   for annotation in self.annotations {
     if annotation.kind == kind {
       return true

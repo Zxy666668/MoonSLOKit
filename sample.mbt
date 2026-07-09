@@ -6,10 +6,18 @@ pub(all) struct TrafficSample {
 } derive(Eq, Debug)
 
 ///|
-pub fn TrafficSample::new(minute : Int, total : Int, good : Int) -> TrafficSample {
+pub fn TrafficSample::new(
+  minute : Int,
+  total : Int,
+  good : Int,
+) -> TrafficSample {
   {
     minute,
-    total: if total > 0 { total } else { 0 },
+    total: if total > 0 {
+      total
+    } else {
+      0
+    },
     good: if good < 0 {
       0
     } else if good > total {

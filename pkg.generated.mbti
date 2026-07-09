@@ -6,6 +6,12 @@ import {
 }
 
 // Values
+pub fn aggregate_recent_samples(String, Int, Int, Array[TrafficSample]) -> RequestWindow
+
+pub fn aggregate_samples(String, Int, Array[TrafficSample]) -> RequestWindow
+
+pub fn annotate_window(RequestWindow, Int, Array[SloAnnotation]) -> AnnotatedWindow
+
 pub fn calculate_burn_rate(SloTarget, RequestWindow) -> BurnReport
 
 pub fn evaluate_budget(SloTarget, RequestWindow) -> BudgetReport
@@ -13,6 +19,18 @@ pub fn evaluate_budget(SloTarget, RequestWindow) -> BudgetReport
 pub fn evaluate_burn_rule(BurnReport, BurnRule) -> AlertDecision
 
 pub fn evaluate_multi_window(SloTarget, Array[RequestWindow], Array[BurnRule]) -> MultiWindowReport
+
+pub fn evaluate_release_gate(ReleaseGate, BudgetReport, MultiWindowReport) -> GateDecision
+
+pub fn evaluate_service_objective(ServiceObjective, RequestWindow, Array[RequestWindow], ReleaseGate) -> ServiceEvaluation
+
+pub fn forecast_budget(SloTarget, RequestWindow, Int) -> BudgetForecast
+
+pub fn standard_burn_rules() -> Array[BurnRule]
+
+pub fn standard_window_minutes() -> Array[Int]
+
+pub fn standard_window_names() -> Array[String]
 
 // Errors
 
@@ -32,6 +50,23 @@ pub(all) enum AlertLevel {
   Page
   Ticket
 } derive(Eq, @debug.Debug)
+pub fn AlertLevel::name(Self) -> String
+
+pub(all) struct AnnotatedWindow {
+  window : RequestWindow
+  annotations : Array[SloAnnotation]
+} derive(Eq, @debug.Debug)
+pub fn AnnotatedWindow::has_kind(Self, String) -> Bool
+
+pub(all) struct BudgetForecast {
+  report : BudgetReport
+  lookback_minutes : Int
+  bad_per_hour_x100 : Int
+  minutes_to_exhaustion : Int
+  state : String
+} derive(Eq, @debug.Debug)
+pub fn BudgetForecast::exhausted(Self) -> Bool
+pub fn BudgetForecast::to_json(Self) -> String
 
 pub(all) struct BudgetReport {
   target : SloTarget
@@ -59,12 +94,28 @@ pub(all) struct BurnRule {
 } derive(Eq, @debug.Debug)
 pub fn BurnRule::new(String, AlertLevel, Int) -> Self
 
+pub(all) struct GateDecision {
+  gate_name : String
+  allowed : Bool
+  reason : String
+  consumed_bp : Int
+  highest_level : AlertLevel
+} derive(Eq, @debug.Debug)
+pub fn GateDecision::to_json(Self) -> String
+
 pub(all) struct MultiWindowReport {
   target : SloTarget
   reports : Array[BurnReport]
   decisions : Array[AlertDecision]
 } derive(Eq, @debug.Debug)
 pub fn MultiWindowReport::highest_level(Self) -> AlertLevel
+
+pub(all) struct ReleaseGate {
+  name : String
+  max_consumed_bp : Int
+  allow_ticket : Bool
+} derive(Eq, @debug.Debug)
+pub fn ReleaseGate::new(String, Int, Bool) -> Self
 
 pub(all) struct RequestWindow {
   name : String
@@ -77,6 +128,31 @@ pub fn RequestWindow::bad(Self) -> Int
 pub fn RequestWindow::error_bp(Self) -> Int
 pub fn RequestWindow::new(String, Int, Int, Int) -> Self
 
+pub(all) struct ServiceEvaluation {
+  service : String
+  target_name : String
+  budget : BudgetReport
+  multi_window : MultiWindowReport
+  gate : GateDecision
+} derive(Eq, @debug.Debug)
+pub fn ServiceEvaluation::healthy(Self) -> Bool
+pub fn ServiceEvaluation::to_json(Self) -> String
+
+pub(all) struct ServiceObjective {
+  service : String
+  target : SloTarget
+  burn_rules : Array[BurnRule]
+} derive(Eq, @debug.Debug)
+pub fn ServiceObjective::new(String, SloTarget, Array[BurnRule]) -> Self
+
+pub(all) struct SloAnnotation {
+  minute : Int
+  kind : String
+  message : String
+} derive(Eq, @debug.Debug)
+pub fn SloAnnotation::new(Int, String, String) -> Self
+pub fn SloAnnotation::to_json(Self) -> String
+
 pub(all) struct SloTarget {
   name : String
   target_bp : Int
@@ -84,6 +160,13 @@ pub(all) struct SloTarget {
 } derive(Eq, @debug.Debug)
 pub fn SloTarget::allowed_error_bp(Self) -> Int
 pub fn SloTarget::new(String, Int, Int) -> Self
+
+pub(all) struct TrafficSample {
+  minute : Int
+  total : Int
+  good : Int
+} derive(Eq, @debug.Debug)
+pub fn TrafficSample::new(Int, Int, Int) -> Self
 
 // Type aliases
 

@@ -93,15 +93,11 @@ test "alert level names are stable" {
 
 ///|
 test "traffic samples aggregate into request windows" {
-  let window = aggregate_samples(
-    "10m",
-    10,
-    [
-      TrafficSample::new(1, 100, 99),
-      TrafficSample::new(2, 200, 190),
-      TrafficSample::new(3, 50, 50),
-    ],
-  )
+  let window = aggregate_samples("10m", 10, [
+    TrafficSample::new(1, 100, 99),
+    TrafficSample::new(2, 200, 190),
+    TrafficSample::new(3, 50, 50),
+  ])
   assert_eq(window.total, 350)
   assert_eq(window.good, 339)
   assert_eq(window.bad(), 11)
@@ -109,16 +105,11 @@ test "traffic samples aggregate into request windows" {
 
 ///|
 test "recent sample aggregation filters by minute" {
-  let window = aggregate_recent_samples(
-    "5m",
-    10,
-    5,
-    [
-      TrafficSample::new(1, 100, 50),
-      TrafficSample::new(6, 100, 99),
-      TrafficSample::new(10, 100, 95),
-    ],
-  )
+  let window = aggregate_recent_samples("5m", 10, 5, [
+    TrafficSample::new(1, 100, 50),
+    TrafficSample::new(6, 100, 99),
+    TrafficSample::new(10, 100, 95),
+  ])
   assert_eq(window.total, 200)
   assert_eq(window.good, 194)
 }
@@ -157,7 +148,10 @@ test "budget forecast marks exhausted budget" {
 ///|
 test "release gate blocks active page alerts" {
   let target = SloTarget::new("api", 9900, 60)
-  let budget = evaluate_budget(target, RequestWindow::new("1h", 60, 10000, 9950))
+  let budget = evaluate_budget(
+    target,
+    RequestWindow::new("1h", 60, 10000, 9950),
+  )
   let multi = evaluate_multi_window(
     target,
     [RequestWindow::new("5m", 5, 1000, 970)],
@@ -175,7 +169,10 @@ test "release gate blocks active page alerts" {
 ///|
 test "release gate blocks high budget consumption" {
   let target = SloTarget::new("api", 9900, 60)
-  let budget = evaluate_budget(target, RequestWindow::new("1h", 60, 10000, 9900))
+  let budget = evaluate_budget(
+    target,
+    RequestWindow::new("1h", 60, 10000, 9900),
+  )
   let multi = evaluate_multi_window(target, [], [])
   let decision = evaluate_release_gate(
     ReleaseGate::new("prod", 5000, true),
@@ -205,15 +202,11 @@ test "service objective evaluates budget burn and gate together" {
 
 ///|
 test "annotated windows select events inside window range" {
-  let annotated = annotate_window(
-    RequestWindow::new("5m", 5, 1000, 990),
-    10,
-    [
-      SloAnnotation::new(9, "deploy", "before"),
-      SloAnnotation::new(12, "incident", "database errors"),
-      SloAnnotation::new(20, "deploy", "after"),
-    ],
-  )
+  let annotated = annotate_window(RequestWindow::new("5m", 5, 1000, 990), 10, [
+    SloAnnotation::new(9, "deploy", "before"),
+    SloAnnotation::new(12, "incident", "database errors"),
+    SloAnnotation::new(20, "deploy", "after"),
+  ])
   assert_eq(annotated.annotations.length(), 1)
   assert_true(annotated.has_kind("incident"))
   assert_false(annotated.has_kind("deploy"))
@@ -227,11 +220,9 @@ test "extended json exports include forecast gate service and annotation" {
     RequestWindow::new("30m", 30, 10000, 9950),
     30,
   )
-  let objective = ServiceObjective::new(
-    "api",
-    target,
-    [BurnRule::new("fast", Page, 500)],
-  )
+  let objective = ServiceObjective::new("api", target, [
+    BurnRule::new("fast", Page, 500),
+  ])
   let service = evaluate_service_objective(
     objective,
     RequestWindow::new("30m", 30, 10000, 9990),
@@ -240,5 +231,9 @@ test "extended json exports include forecast gate service and annotation" {
   )
   assert_true(forecast.to_json().contains("\"state\":\"critical\""))
   assert_true(service.to_json().contains("\"service\":\"api\""))
-  assert_true(SloAnnotation::new(10, "deploy", "v2").to_json().contains("\"kind\":\"deploy\""))
+  assert_true(
+    SloAnnotation::new(10, "deploy", "v2")
+    .to_json()
+    .contains("\"kind\":\"deploy\""),
+  )
 }

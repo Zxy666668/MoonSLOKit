@@ -10,11 +10,7 @@ fn main {
   )
   let forecast = @slo.forecast_budget(target, window, 5)
   let service = @slo.evaluate_service_objective(
-    @slo.ServiceObjective::new(
-      "checkout",
-      target,
-      @slo.standard_burn_rules(),
-    ),
+    @slo.ServiceObjective::new("checkout", target, @slo.standard_burn_rules()),
     @slo.RequestWindow::new("30m", 30, 10000, 9950),
     [
       @slo.RequestWindow::new("5m", 5, 1000, 980),

@@ -11,11 +11,7 @@ pub fn ReleaseGate::new(
   max_consumed_bp : Int,
   allow_ticket : Bool,
 ) -> ReleaseGate {
-  {
-    name,
-    max_consumed_bp: clamp_gate_bp(max_consumed_bp),
-    allow_ticket,
-  }
+  { name, max_consumed_bp: clamp_gate_bp(max_consumed_bp), allow_ticket }
 }
 
 ///|

@@ -14,7 +14,11 @@ pub fn forecast_budget(
   lookback_minutes : Int,
 ) -> BudgetForecast {
   let report = evaluate_budget(target, window)
-  let lookback = if lookback_minutes > 0 { lookback_minutes } else { window.minutes }
+  let lookback = if lookback_minutes > 0 {
+    lookback_minutes
+  } else {
+    window.minutes
+  }
   let bad_per_hour_x100 = if lookback <= 0 {
     0
   } else {

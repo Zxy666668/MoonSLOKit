@@ -47,5 +47,7 @@ pub fn evaluate_service_objective(
 
 ///|
 pub fn ServiceEvaluation::healthy(self : ServiceEvaluation) -> Bool {
-  self.gate.allowed && self.multi_window.highest_level() == Ok && self.budget.healthy()
+  self.gate.allowed &&
+  self.multi_window.highest_level() == Ok &&
+  self.budget.healthy()
 }
