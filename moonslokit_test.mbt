@@ -153,3 +153,35 @@ test "budget forecast marks exhausted budget" {
   )
   assert_true(forecast.exhausted())
 }
+
+///|
+test "release gate blocks active page alerts" {
+  let target = SloTarget::new("api", 9900, 60)
+  let budget = evaluate_budget(target, RequestWindow::new("1h", 60, 10000, 9950))
+  let multi = evaluate_multi_window(
+    target,
+    [RequestWindow::new("5m", 5, 1000, 970)],
+    [BurnRule::new("fast", Page, 200)],
+  )
+  let decision = evaluate_release_gate(
+    ReleaseGate::new("prod", 8000, true),
+    budget,
+    multi,
+  )
+  assert_false(decision.allowed)
+  assert_eq(decision.reason, "page_alert_active")
+}
+
+///|
+test "release gate blocks high budget consumption" {
+  let target = SloTarget::new("api", 9900, 60)
+  let budget = evaluate_budget(target, RequestWindow::new("1h", 60, 10000, 9900))
+  let multi = evaluate_multi_window(target, [], [])
+  let decision = evaluate_release_gate(
+    ReleaseGate::new("prod", 5000, true),
+    budget,
+    multi,
+  )
+  assert_false(decision.allowed)
+  assert_eq(decision.reason, "budget_consumed_too_high")
+}
