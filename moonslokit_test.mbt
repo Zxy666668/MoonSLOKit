@@ -185,3 +185,20 @@ test "release gate blocks high budget consumption" {
   assert_false(decision.allowed)
   assert_eq(decision.reason, "budget_consumed_too_high")
 }
+
+///|
+test "service objective evaluates budget burn and gate together" {
+  let objective = ServiceObjective::new(
+    "checkout",
+    SloTarget::new("availability", 9900, 30),
+    [BurnRule::new("fast", Page, 500)],
+  )
+  let result = evaluate_service_objective(
+    objective,
+    RequestWindow::new("30m", 30, 10000, 9990),
+    [RequestWindow::new("5m", 5, 1000, 999)],
+    ReleaseGate::new("prod", 8000, true),
+  )
+  assert_eq(result.service, "checkout")
+  assert_true(result.healthy())
+}
