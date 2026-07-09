@@ -90,3 +90,42 @@ test "alert level names are stable" {
   }
   assert_eq(alert.level_name(), "ticket")
 }
+
+///|
+test "traffic samples aggregate into request windows" {
+  let window = aggregate_samples(
+    "10m",
+    10,
+    [
+      TrafficSample::new(1, 100, 99),
+      TrafficSample::new(2, 200, 190),
+      TrafficSample::new(3, 50, 50),
+    ],
+  )
+  assert_eq(window.total, 350)
+  assert_eq(window.good, 339)
+  assert_eq(window.bad(), 11)
+}
+
+///|
+test "recent sample aggregation filters by minute" {
+  let window = aggregate_recent_samples(
+    "5m",
+    10,
+    5,
+    [
+      TrafficSample::new(1, 100, 50),
+      TrafficSample::new(6, 100, 99),
+      TrafficSample::new(10, 100, 95),
+    ],
+  )
+  assert_eq(window.total, 200)
+  assert_eq(window.good, 194)
+}
+
+///|
+test "standard burn templates expose four windows" {
+  assert_eq(standard_burn_rules().length(), 4)
+  assert_eq(standard_window_names()[0], "5m")
+  assert_eq(standard_window_minutes()[3], 1440)
+}
