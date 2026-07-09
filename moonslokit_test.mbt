@@ -202,3 +202,19 @@ test "service objective evaluates budget burn and gate together" {
   assert_eq(result.service, "checkout")
   assert_true(result.healthy())
 }
+
+///|
+test "annotated windows select events inside window range" {
+  let annotated = annotate_window(
+    RequestWindow::new("5m", 5, 1000, 990),
+    10,
+    [
+      SloAnnotation::new(9, "deploy", "before"),
+      SloAnnotation::new(12, "incident", "database errors"),
+      SloAnnotation::new(20, "deploy", "after"),
+    ],
+  )
+  assert_eq(annotated.annotations.length(), 1)
+  assert_true(annotated.has_kind("incident"))
+  assert_false(annotated.has_kind("deploy"))
+}
